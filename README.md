@@ -1,4 +1,4 @@
 output-panel
 ============
 
-A Brackets extension that provides a panel for displaying run-time information.
+A [Brackets](https://github.com/adobe/brackets) extension that provides a panel for displaying run-time information.
