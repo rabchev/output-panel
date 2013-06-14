@@ -1,0 +1,21 @@
+/* Toolbar icon */
+#output-panel-icon {
+    background: url(icon.svg);
+    background-repeat: no-repeat;
+    background-position: left top;
+    background-size: 100%;
+    display: inline-block;
+    position: relative;
+    width: 18px;
+    height: 11px;
+    padding-right: 8px;
+    opacity: .7;
+}
+
+#output-panel-icon.active {
+    opacity: .9;
+}
+
+#output-panel-icon:hover {
+	opacity: .5;
+}
