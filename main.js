@@ -12,13 +12,44 @@ define(function (require, exports, module) {
     var $icon,
         $iframe,
         $document,
-        $content,
-        $toolbar;
+        $content;
     
     var panel,
         linesCount          = 0,
+        tlBarHeight         = 0,
         visible             = false,
-        realVisibility      = false;
+        realVisibility      = false,
+        buffer              = [];
+    
+    function _pushToPanel(sender, message) {
+        var $p,
+            $first;
+        
+        if (!$document) {
+            $document = $($iframe.contents()[0]);
+            $content = $document.find("body");
+        }
+        
+        if (linesCount >= exports.maxLines) {
+            $first = $content.find("#ln" + (linesCount - exports.maxLines));
+            if ($first.length > 0) {
+                $first.remove();
+            }
+        }
+        
+        linesCount++;
+        $p = $("<div>", {
+            id          : "ln" + linesCount,
+            "class"     : sender
+        });
+        $content.append($p);
+        $p.append(message);
+        $content.animate({ scrollTop: $document.height() }, "fast");
+    }
+    
+    function _pushToBuffer(category, message) {
+        
+    }
     
     function _resizeIframe() {
         if (visible && $iframe) {
@@ -41,20 +72,14 @@ define(function (require, exports, module) {
             $iframe = $panel.find("#output-panel-frame");
             $iframe.attr("srcdoc", htmlSource);
             
-            $toolbar = $panel.find(".toolbar");
-            
             panel = PanelManager.createBottomPanel("output-panel", $panel);
             $panel.on("panelResizeUpdate", function (e, newSize) {
-                $iframe.attr("height", newSize - $toolbar.height());
+                $iframe.attr("height", newSize - tlBarHeight);
             });
-            $iframe.attr("height", $panel.height() - $toolbar.height());
             
             $close.click(function () {
                 _toggleVisibility();
             });
-
-            $document = $($iframe.contents()[0]);
-            $content = $document.find("body");
             
             window.setTimeout(_resizeIframe);
         }
@@ -68,9 +93,13 @@ define(function (require, exports, module) {
         realVisibility = isVisible;
         if (isVisible) {
             _init();
-            
             $icon.toggleClass("active");
             panel.show();
+            if (tlBarHeight === 0) {
+                tlBarHeight = panel.$panel.find(".toolbar").height();
+                tlBarHeight += panel.$panel.find(".vert-resizer").height() + 5;
+                $iframe.attr("height", panel.$panel.height() - tlBarHeight);
+            }
         } else {
             $icon.toggleClass("active");
             panel.hide();
@@ -100,9 +129,6 @@ define(function (require, exports, module) {
     $("#sidebar").on("panelCollapsed panelExpanded panelResizeUpdate", _resizeIframe);
     
     exports.log = function (sender, message) {
-        var $p,
-            $first;
-        
         _init();
         
         if (!message) {
@@ -115,21 +141,11 @@ define(function (require, exports, module) {
         }
         
         if (typeof message === "string") {
-            if (linesCount >= exports.maxLines) {
-                $first = $content.find("#ln" + (linesCount - exports.maxLines));
-                if ($first.length > 0) {
-                    $first.remove();
-                }
+            if (realVisibility) {
+                _pushToPanel(sender, message);
+            } else {
+                _pushToBuffer(sender, message);
             }
-            
-            linesCount++;
-            $p = $("<p>", {
-                id          : "ln" + linesCount,
-                "class"     : sender
-            });
-            $content.append($p);
-            $p.append(message);
-            $content.animate({ scrollTop: $document.height() }, "slow");
         }
     };
     
