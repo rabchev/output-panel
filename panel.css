@@ -19,3 +19,21 @@
 #output-panel-icon:hover {
 	opacity: .5;
 }
+
+/* Toolbar button */
+#output-panel-clear-all {
+    background: url(clear-all.svg);
+    background-repeat: no-repeat;
+    background-position: left top;
+    background-size: 100%;
+    display: inline-block;
+    position: absolute;
+    margin-left: 10px;
+    width: 32px;
+    height: 20px;
+    opacity: .7;
+}
+
+#output-panel-clear-all:hover {
+	opacity: .5;
+}

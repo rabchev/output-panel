@@ -19,7 +19,8 @@ define(function (require, exports, module) {
         tlBarHeight         = 0,
         visible             = false,
         realVisibility      = false,
-        buffer              = [];
+        buffer              = [],
+        scrolling           = false;
     
     function _pushToPanel(sender, message) {
         var $p,
@@ -44,11 +45,20 @@ define(function (require, exports, module) {
         });
         $content.append($p);
         $p.append(message);
-        $content.animate({ scrollTop: $document.height() }, "fast");
+        if (!scrolling) {
+            scrolling = true;
+            window.setTimeout(function () {
+                $content.animate({ scrollTop: $document.height() }, "fast");
+                scrolling = false;
+            }, 10);
+        }
     }
     
     function _pushToBuffer(category, message) {
-        
+        if (buffer.length >= exports.maxLines) {
+            buffer.splice(0, 1);
+        }
+        buffer.push({ category: category, message: message});
     }
     
     function _resizeIframe() {
@@ -60,8 +70,9 @@ define(function (require, exports, module) {
     
     function _init() {
         if (!panel) {
-            var $panel = $(panelHTML),
-                $close = $panel.find(".close"),
+            var $panel      = $(panelHTML),
+                $clearAll   = $panel.find("#output-panel-clear-all"),
+                $close      = $panel.find(".close"),
                 htmlSource;
             
             htmlSource = "<html><head>";
@@ -75,6 +86,10 @@ define(function (require, exports, module) {
             panel = PanelManager.createBottomPanel("output-panel", $panel);
             $panel.on("panelResizeUpdate", function (e, newSize) {
                 $iframe.attr("height", newSize - tlBarHeight);
+            });
+            
+            $clearAll.click(function () {
+                exports.clear();
             });
             
             $close.click(function () {
@@ -93,6 +108,12 @@ define(function (require, exports, module) {
         realVisibility = isVisible;
         if (isVisible) {
             _init();
+            if (buffer.length > 0) {
+                buffer.forEach(function (el) {
+                    _pushToPanel(el.category, el.message);
+                });
+                buffer.length = 0;
+            }
             $icon.toggleClass("active");
             panel.show();
             if (tlBarHeight === 0) {
@@ -154,6 +175,7 @@ define(function (require, exports, module) {
             $content.empty();
             linesCount = 0;
         }
+        buffer.length = 0;
     };
     
     exports.setVisibility = function (isVisible) {
