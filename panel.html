@@ -1,7 +1,11 @@
 <div id="output-panel" class="bottom-panel vert-resizable top-resizer">
     <div class="toolbar simple-toolbar-layout">
-        <div class="title">Output</div>
-        <a href="#" class="title" title="Clear All" id="output-panel-clear-all"></a>
+        <div class="title" id="output-panel-title">Output</div>
+        <div class="title" id="output-panel-divider">|</div>
+        <select class="title output-panel-tool" id="output-panel-category" title="Show output for:">
+            <option value="all">All</option>
+        </select>
+        <a href="#" class="title output-panel-tool" title="Clear All" id="output-panel-clear-all"></a>
         <a href="#" class="close">×</a>
     </div>
     <iframe id="output-panel-frame" width="100" height="200" seamless="true"></iframe>

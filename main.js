@@ -12,9 +12,13 @@ define(function (require, exports, module) {
     var $icon,
         $iframe,
         $document,
-        $content;
+        $content,
+        $filter;
     
     var panel,
+        selCat              = "all",
+        _maxLines           = 1000,
+        filter              = {},
         linesCount          = 0,
         tlBarHeight         = 0,
         visible             = false,
@@ -22,17 +26,25 @@ define(function (require, exports, module) {
         buffer              = [],
         scrolling           = false;
     
-    function _pushToPanel(sender, message) {
+    function _pushToPanel(category, message, timestamp) {
         var $p,
             $first;
+        
+        if (!filter[category]) {
+            filter[category] = category.replace(/\s/g, "-");
+            $filter.append($("<option>", {
+                value   : category,
+                text    : category
+            }));
+        }
         
         if (!$document) {
             $document = $($iframe.contents()[0]);
             $content = $document.find("body");
         }
         
-        if (linesCount >= exports.maxLines) {
-            $first = $content.find("#ln" + (linesCount - exports.maxLines));
+        if (linesCount >= exports.maxLines()) {
+            $first = $content.find("#ln" + (linesCount - exports.maxLines()));
             if ($first.length > 0) {
                 $first.remove();
             }
@@ -41,9 +53,15 @@ define(function (require, exports, module) {
         linesCount++;
         $p = $("<div>", {
             id          : "ln" + linesCount,
-            "class"     : sender
+            "class"     : "msg " + filter[category]
         });
+        if (selCat !== "all" && selCat !== category) {
+            $p.addClass("hide");
+        }
         $content.append($p);
+        $p.append($("<span>", {
+            text: timestamp.toISOString()
+        }));
         $p.append(message);
         if (!scrolling) {
             scrolling = true;
@@ -54,11 +72,15 @@ define(function (require, exports, module) {
         }
     }
     
-    function _pushToBuffer(category, message) {
-        if (buffer.length >= exports.maxLines) {
+    function _pushToBuffer(category, message, timestamp) {
+        if (buffer.length >= exports.maxLines()) {
             buffer.splice(0, 1);
         }
-        buffer.push({ category: category, message: message});
+        buffer.push({
+            category: category,
+            message: message,
+            timestamp: timestamp
+        });
     }
     
     function _resizeIframe() {
@@ -80,6 +102,7 @@ define(function (require, exports, module) {
             htmlSource += "</head><body>";
             htmlSource += "</body></html>";
             
+            $filter = $panel.find("#output-panel-category");
             $iframe = $panel.find("#output-panel-frame");
             $iframe.attr("srcdoc", htmlSource);
             
@@ -94,6 +117,20 @@ define(function (require, exports, module) {
             
             $close.click(function () {
                 _toggleVisibility();
+            });
+            
+            $filter.change(function () {
+                var sel = $filter.val();
+                if (sel === "all") {
+                    $content.find(".hide")
+                        .removeClass("hide");
+                } else {
+                    $content.find(".msg:not(:has(." + filter[sel] + "))")
+                        .addClass("hide");
+                    $content.find("." + filter[sel])
+                        .removeClass("hide");
+                }
+                selCat = sel;
             });
             
             window.setTimeout(_resizeIframe);
@@ -149,12 +186,12 @@ define(function (require, exports, module) {
     $(PanelManager).on("editorAreaResize", _resizeIframe);
     $("#sidebar").on("panelCollapsed panelExpanded panelResizeUpdate", _resizeIframe);
     
-    exports.log = function (sender, message) {
+    exports.log = function (category, message) {
         _init();
         
         if (!message) {
-            message = sender;
-            sender = "Undefined";
+            message = category;
+            category = "Undefined";
         }
         
         if (!message) {
@@ -163,9 +200,9 @@ define(function (require, exports, module) {
         
         if (typeof message === "string") {
             if (realVisibility) {
-                _pushToPanel(sender, message);
+                _pushToPanel(category, message, new Date());
             } else {
-                _pushToBuffer(sender, message);
+                _pushToBuffer(category, message, new Date());
             }
         }
     };
@@ -174,6 +211,17 @@ define(function (require, exports, module) {
         if ($content) {
             $content.empty();
             linesCount = 0;
+            
+            filter = {};
+            selCat = "all";
+            $filter
+                .find("option")
+                .remove()
+                .end()
+                .append($("<option>", {
+                    value   : "all",
+                    text    : "All"
+                }));
         }
         buffer.length = 0;
     };
@@ -188,6 +236,34 @@ define(function (require, exports, module) {
         return realVisibility;
     };
     
+    exports.maxLines = function (val) {
+        if (val) {
+            if (val < _maxLines) {
+                
+                if (linesCount > val) {
+                    var i,
+                        $el,
+                        from = linesCount > _maxLines ? linesCount - _maxLines : 0,
+                        to = linesCount - val;
+                    
+                    for (i = from; i < to; i++) {
+                        $el = $content.find("#ln" + i);
+                        if ($el.length > 0) {
+                            $el.remove();
+                        }
+                    }
+                }
+                
+                if (buffer.length > val) {
+                    buffer.splice(0, buffer.length - val);
+                }
+            }
+            _maxLines = val;
+        }
+        
+        return _maxLines;
+    };
+    
     exports.toggleVisibility = _toggleVisibility;
-    exports.maxLines = 1000;
+    
 });

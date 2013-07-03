@@ -1,0 +1,26 @@
+{
+    "name": "output-panel",
+    "title": "Output Panel",
+    "description": "Brackets extension that provides a panel for displaying run-time information.",
+    "version": "0.1.0",
+    "author": "Boyan Rabchev <boyan@rabchev.com>",
+    "contributors": [
+        { "name": "Boyan Rabchev", "email": "boyan@rabchev.com" }
+    ],
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/rabchev/output-panel.git"
+    },
+    "homepage": "https://github.com/rabchev/output-panel",
+    "bugs": {
+        "email": "boyan@rabchev.com",
+        "url": "https://github.com/rabchev/output-panel/issues"
+    },
+    "license": {
+        "type": "MIT",
+        "url": "http://github.com/rabchev/output-panel/blob/master/LICENSE"
+    },
+    "engines": {
+        "brackets": ">=0.25.0"
+    }
+}
