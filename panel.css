@@ -52,7 +52,7 @@
     background-size: 100%;
     display: inline-block;
     margin-top: 2px;
-    margin-left: 210px;
+    margin-left: 212px;
     width: 26px;
     height: 17px;
     opacity: .5;
@@ -60,4 +60,31 @@
 
 #output-panel-clear-all:hover {
 	opacity: .7;
+}
+
+#output-panel-options {
+    background: url(options.svg);
+    background-repeat: no-repeat;
+    background-position: left top;
+    background-size: 100%;
+    display: inline-block;
+    margin-top: 0px;
+    margin-left: 242px;
+    width: 26px;
+    height: 17px;
+    opacity: .5;
+}
+
+#output-panel-options:hover {
+	opacity: .7;
+}
+
+#op-opts-buffer-size {
+    text-align: right;
+    width: 100px;
+}
+
+#op-opts-buff-cnt label {
+    display: inline;
+    margin-right: 5px;
 }

@@ -1,10 +1,11 @@
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, browser: true, regexp: true, indent: 4, maxerr: 50 */
-/*global define, brackets, $, PathUtils, _toggleVisibility */
+/*global define, brackets, $, PathUtils, Mustache, _toggleVisibility */
 
 define(function (require, exports, module) {
     "use strict";
     
     var PanelManager        = brackets.getModule("view/PanelManager"),
+        Dialogs             = brackets.getModule("widgets/Dialogs"),
         ExtensionUtils      = brackets.getModule("utils/ExtensionUtils");
     
     var panelHTML           = require("text!./panel.html");
@@ -94,6 +95,7 @@ define(function (require, exports, module) {
         if (!panel) {
             var $panel      = $(panelHTML),
                 $clearAll   = $panel.find("#output-panel-clear-all"),
+                $options    = $panel.find("#output-panel-options"),
                 $close      = $panel.find(".close"),
                 htmlSource;
             
@@ -131,6 +133,21 @@ define(function (require, exports, module) {
                         .removeClass("hide");
                 }
                 selCat = sel;
+            });
+            
+            $options.click(function () {
+                var tmpl = require("text!./options.html"),
+                    mod = {
+                        bufferSize: exports.maxLines(),
+                        labels: {
+                            ok: "OK",
+                            cancel: "Cancel",
+                            title: "Output Panel Options",
+                            bufferSize: "Buffer Size: ",
+                            bufferSizeHelp: "(number of messages / lines)."
+                        }
+                    },
+                    dialog = Dialogs.showModalDialogUsingTemplate(Mustache.render(tmpl, mod));
             });
             
             window.setTimeout(_resizeIframe);
