@@ -6,7 +6,9 @@ define(function (require, exports, module) {
     
     var PanelManager        = brackets.getModule("view/PanelManager"),
         Dialogs             = brackets.getModule("widgets/Dialogs"),
-        ExtensionUtils      = brackets.getModule("utils/ExtensionUtils");
+        PreferencesManager  = brackets.getModule("preferences/PreferencesManager"),
+        ExtensionUtils      = brackets.getModule("utils/ExtensionUtils"),
+        Strings             = require("strings");
     
     var panelHTML           = require("text!./panel.html");
     
@@ -17,8 +19,15 @@ define(function (require, exports, module) {
         $filter;
     
     var panel,
+        _maxLinesKey        = "out-pnl-maxLines",
+        _timestampKey       = "out-pnl-timestamp",
+        _prefs              = PreferencesManager.getPreferenceStorage(module, {
+            "out-pnl-maxLines"      : 1000,
+            "out-pnl-timestamp"     : "none"
+        }),
+        _maxLines           = _prefs.getValue(_maxLinesKey),
+        _timestamp          = _prefs.getValue(_timestampKey),
         selCat              = "all",
-        _maxLines           = 1000,
         filter              = {},
         linesCount          = 0,
         tlBarHeight         = 0,
@@ -29,7 +38,8 @@ define(function (require, exports, module) {
     
     function _pushToPanel(category, message, timestamp) {
         var $p,
-            $first;
+            $first,
+            hide;
         
         if (!filter[category]) {
             filter[category] = category.replace(/\s/g, "-");
@@ -60,9 +70,10 @@ define(function (require, exports, module) {
             $p.addClass("hide");
         }
         $content.append($p);
-        $p.append($("<span>", {
-            text: timestamp.toISOString()
-        }));
+        hide = _timestamp === exports.temestamp.date ? "" : " hide-timestamp";
+        $p.append("<span class=\"date" + hide + "\">" + timestamp.getFullYear() + "-" + timestamp.getMonth() + "-" + timestamp.getDate() + "</span>");
+        hide = _timestamp === exports.temestamp.none ? " hide-timestamp" : "";
+        $p.append("<span class=\"time" + hide + "\">" + timestamp.getHours() + ":" + timestamp.getMinutes() + ":" + timestamp.getSeconds() + "</span>");
         $p.append(message);
         if (!scrolling) {
             scrolling = true;
@@ -140,14 +151,29 @@ define(function (require, exports, module) {
                     mod = {
                         bufferSize: exports.maxLines(),
                         labels: {
-                            ok: "OK",
-                            cancel: "Cancel",
-                            title: "Output Panel Options",
-                            bufferSize: "Buffer Size: ",
-                            bufferSizeHelp: "(number of messages / lines)."
+                            ok                  : Strings.LBL_OK,
+                            cancel              : Strings.LBL_CANCEL,
+                            title               : Strings.LBL_TITLE,
+                            bufferSize          : Strings.LBL_BUFF_SIZE,
+                            bufferSizeHelp      : Strings.LBL_BUFF_SIZE_HELP,
+                            timestamp           : Strings.LBL_TIMESTAMP,
+                            none                : Strings.LBL_NONE,
+                            time                : Strings.LBL_TIME,
+                            date                : Strings.LBL_DATE
                         }
                     },
-                    dialog = Dialogs.showModalDialogUsingTemplate(Mustache.render(tmpl, mod));
+                    dialog = Dialogs.showModalDialogUsingTemplate(Mustache.render(tmpl, mod)),
+                    $dlg = dialog.getElement();
+                
+                dialog.done(function (id) {
+                    if (id === Dialogs.DIALOG_BTN_OK) {
+                        exports.maxLines($dlg.find("#op-opts-buffer-size").val());
+                        exports.temestamp.set($dlg.find("input:radio[name='op-timestamp']:checked").val());
+                    }
+                });
+                
+                $dlg.find("input:radio[value='" + _timestamp + "']").attr('checked', 'checked');
+                $dlg.find("#op-opts-buffer-size").focus();
             });
             
             window.setTimeout(_resizeIframe);
@@ -162,18 +188,20 @@ define(function (require, exports, module) {
         realVisibility = isVisible;
         if (isVisible) {
             _init();
-            if (buffer.length > 0) {
-                buffer.forEach(function (el) {
-                    _pushToPanel(el.category, el.message);
-                });
-                buffer.length = 0;
-            }
             $icon.toggleClass("active");
             panel.show();
             if (tlBarHeight === 0) {
                 tlBarHeight = panel.$panel.find(".toolbar").height();
                 tlBarHeight += panel.$panel.find(".vert-resizer").height() + 5;
                 $iframe.attr("height", panel.$panel.height() - tlBarHeight);
+            }
+            if (buffer.length > 0) {
+                window.setTimeout(function () {
+                    buffer.forEach(function (el) {
+                        _pushToPanel(el.category, el.message, el.timestamp);
+                    });
+                    buffer.length = 0;
+                });
             }
         } else {
             $icon.toggleClass("active");
@@ -276,11 +304,35 @@ define(function (require, exports, module) {
                 }
             }
             _maxLines = val;
+            _prefs.setValue(_maxLinesKey, _maxLines);
         }
         
         return _maxLines;
     };
     
     exports.toggleVisibility = _toggleVisibility;
+    
+    exports.temestamp = {
+        none: "none",
+        time: "time",
+        date: "date",
+        set: function (val) {
+            _timestamp = val;
+            _prefs.setValue(_timestampKey, _timestamp);
+            
+            switch (_timestamp) {
+            case "none":
+                $content.find(".date, .time").addClass("hide-timestamp");
+                break;
+            case "time":
+                $content.find(".time").removeClass("hide-timestamp");
+                $content.find(".date").addClass("hide-timestamp");
+                break;
+            case "date":
+                $content.find(".date, .time").removeClass("hide-timestamp");
+                break;
+            }
+        }
+    };
     
 });

@@ -82,9 +82,22 @@
 #op-opts-buffer-size {
     text-align: right;
     width: 100px;
+    margin-left: 100px;
 }
 
-#op-opts-buff-cnt label {
-    display: inline;
+#op-opts-buff-cnt span {
+    color: #6c6c6c;
+}
+
+#op-timestamp {
+    position: relative;
+}
+
+#op-timestamp label {
+    color: #6c6c6c;
+    margin-left: 100px;
+}
+
+#op-timestamp input {
     margin-right: 5px;
 }

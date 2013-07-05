@@ -4,8 +4,21 @@
     </div>
     <div class="modal-body">
         <div id="op-opts-buff-cnt">
-            <label for="op-opts-buffer-size">{{labels.bufferSize}}</label><input type="text" value="{{bufferSize}}" id="op-opts-buffer-size" />
+            <label for="op-opts-buffer-size">{{labels.bufferSize}}</label>
+            <input type="text" value="{{bufferSize}}" id="op-opts-buffer-size" />
             <span>{{labels.bufferSizeHelp}}</span>
+        </div>
+        <div id="op-timestamp">
+            <span>{{labels.timestamp}}</span>
+            <label>
+                <input type="radio" name="op-timestamp" value="none" />{{labels.none}}
+            </label>
+            <label>
+                <input type="radio" name="op-timestamp" value="time" />{{labels.time}}
+            </label>
+            <label>
+                <input type="radio" name="op-timestamp" value="date" />{{labels.date}}
+            </label>
         </div>
     </div>
     <div class="modal-footer">

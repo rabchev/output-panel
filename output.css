@@ -13,3 +13,17 @@ body {
 .hide {
     display: none;
 }
+
+.hide-timestamp {
+    display: none;
+}
+
+.time {
+    margin-right: 5px;
+    color: #888888;
+}
+
+.date {
+    margin-right: 5px;
+    color: #888888;
+}
