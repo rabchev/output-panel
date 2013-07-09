@@ -9,6 +9,7 @@ var fs          = require("fs"),
     chai        = require("chai"),
     assert      = chai.assert,
     port        = 13191,
+    host        = "http://localhost:" + port,
     server,
     win;
 
@@ -17,7 +18,7 @@ describe("Unit Testing: Output Panel", function () {
     
     debugger;
     
-    before(function () {
+    before(function (done) {
         server = http.createServer(function (req, res) {
             send(req, req.url)
                 .root(path.join(__dirname, ".."))
@@ -25,22 +26,38 @@ describe("Unit Testing: Output Panel", function () {
         });
         
         server.listen(port);
-        console.log("HTTP server running at http://localhost:" + port + "/");
+        console.log("HTTP server running at " + host);
         
         jsdom.env({
-            url: "http://localhost:" + port + "/test/container.html",
+            url: host + "/test/container.html",
             scripts: [
-                "http://localhost:" + port + "/test/thirdparty/jquery-2.0.1.js",
-                "http://localhost:" + port + "/test/thirdparty/mustache.js",
-                "http://localhost:" + port + "/test/thirdparty/require.js"
+                host + "/test/thirdparty/jquery-2.0.1.js",
+                host + "/test/thirdparty/mustache.js",
+                host + "/test/thirdparty/require.js",
+                host + "/test/main-mock.js"
             ],
             done: function (errors, window) {
-                win = window;
+                if (errors) {
+                    errors.forEach(function (err) {
+                        if (err.data) {
+                            console.log(err.data.error);
+                            console.log(err.data.filename);
+                        } else {
+                            console.log(err.message);
+                        }
+                    });
+                    throw new Error("Loading container.html failed.");
+                } else {
+                    win = window;
+                    console.log(win.output);
+                    done();
+                }
             }
         });
     });
     
     after(function () {
+        win.close();
         server.close();
         console.log("HTTP server closed at http://localhost:" + port + "/");
     });
