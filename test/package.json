@@ -1,0 +1,11 @@
+{
+    "name": "output-panel-test",
+    "version": "0.1.0",
+    "main": "test",
+    "devDependencies": {
+        "mocha": "*",
+        "chai": "*",
+        "send": "*",
+        "jsdom": "*"
+    }
+}
