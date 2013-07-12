@@ -31,11 +31,15 @@ describe("Unit Testing: Output Panel", function () {
         jsdom.env({
             url: host + "/test/container.html",
             scripts: [
-                host + "/test/thirdparty/jquery-2.0.1.js",
-                host + "/test/thirdparty/mustache.js",
-                host + "/test/thirdparty/require.js",
-                host + "/test/main-mock.js"
+                "thirdparty/jquery-2.0.1.js",
+                "thirdparty/mustache.js",
+                "/test/main-mock.js"
             ],
+            features: {
+                FetchExternalResources: ["script"],
+                ProcessExternalResources: ["script"],
+                SkipExternalResources: false
+            },
             done: function (errors, window) {
                 if (errors) {
                     errors.forEach(function (err) {
@@ -49,7 +53,8 @@ describe("Unit Testing: Output Panel", function () {
                     throw new Error("Loading container.html failed.");
                 } else {
                     win = window;
-                    console.log(win.output);
+                    
+                    
                     done();
                 }
             }
