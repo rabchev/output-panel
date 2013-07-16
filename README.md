@@ -57,10 +57,12 @@ Sets the visibility of the output panel.
 
 #### output.timestamp.set(output.timestamp.date);
 Sets the visibility and format of entry timestamps.
-Values: 
-    timestamp.none = "none"; // Timestamps are not displayed
-    timestamp.time = "time"; // Displays time only
-    timestamp.date = "date"; // Displays date and time
+
+Values:
+
+* timestamp.none = "none";  // Timestamps are not displayed
+* timestamp.time = "time";  // Displays time only
+* timestamp.date = "date";  // Displays date and time
 
 Default is "none".
     
