@@ -70,9 +70,9 @@ define(function (require, exports, module) {
             $p.addClass("hide");
         }
         $content.append($p);
-        hide = _timestamp === exports.temestamp.date ? "" : " hide-timestamp";
+        hide = _timestamp === exports.timestamp.date ? "" : " hide-timestamp";
         $p.append("<span class=\"date" + hide + "\">" + timestamp.getFullYear() + "-" + timestamp.getMonth() + "-" + timestamp.getDate() + "</span>");
-        hide = _timestamp === exports.temestamp.none ? " hide-timestamp" : "";
+        hide = _timestamp === exports.timestamp.none ? " hide-timestamp" : "";
         $p.append("<span class=\"time" + hide + "\">" + timestamp.getHours() + ":" + timestamp.getMinutes() + ":" + timestamp.getSeconds() + "</span>");
         $p.append(message);
         if (!scrolling) {
@@ -133,17 +133,7 @@ define(function (require, exports, module) {
             });
             
             $filter.change(function () {
-                var sel = $filter.val();
-                if (sel === "all") {
-                    $content.find(".hide")
-                        .removeClass("hide");
-                } else {
-                    $content.find(".msg:not(:has(." + filter[sel] + "))")
-                        .addClass("hide");
-                    $content.find("." + filter[sel])
-                        .removeClass("hide");
-                }
-                selCat = sel;
+                exports.filter($filter.val());
             });
             
             $options.click(function () {
@@ -168,7 +158,7 @@ define(function (require, exports, module) {
                 dialog.done(function (id) {
                     if (id === Dialogs.DIALOG_BTN_OK) {
                         exports.maxLines($dlg.find("#op-opts-buffer-size").val());
-                        exports.temestamp.set($dlg.find("input:radio[name='op-timestamp']:checked").val());
+                        exports.timestamp.set($dlg.find("input:radio[name='op-timestamp']:checked").val());
                     }
                 });
                 
@@ -310,9 +300,22 @@ define(function (require, exports, module) {
         return _maxLines;
     };
     
+    exports.filter = function (category) {
+        if (category === "all") {
+            $content.find(".hide")
+                .removeClass("hide");
+        } else {
+            $content.find(".msg:not(:has(." + filter[category] + "))")
+                .addClass("hide");
+            $content.find("." + filter[category])
+                .removeClass("hide");
+        }
+        selCat = category;
+    };
+    
     exports.toggleVisibility = _toggleVisibility;
     
-    exports.temestamp = {
+    exports.timestamp = {
         none: "none",
         time: "time",
         date: "date",
