@@ -49,11 +49,6 @@ define(function (require, exports, module) {
             }));
         }
         
-        if (!$document) {
-            $document = $($iframe.contents()[0]);
-            $content = $document.find("body");
-        }
-        
         if (linesCount >= exports.maxLines()) {
             $first = $content.find("#ln" + (linesCount - exports.maxLines()));
             if ($first.length > 0) {
@@ -108,18 +103,17 @@ define(function (require, exports, module) {
                 $clearAll   = $panel.find("#output-panel-clear-all"),
                 $options    = $panel.find("#output-panel-options"),
                 $close      = $panel.find(".close"),
-                htmlSource;
-            
-            htmlSource = "<html><head>";
-            htmlSource += "<link href='" + require.toUrl("./output.css") + "' rel='stylesheet'></link>";
-            htmlSource += "</head><body>";
-            htmlSource += "</body></html>";
+                cssLink     = "<link href='" + require.toUrl("./output.css") + "' rel='stylesheet'></link>";
             
             $filter = $panel.find("#output-panel-category");
             $iframe = $panel.find("#output-panel-frame");
-            $iframe.attr("srcdoc", htmlSource);
             
             panel = PanelManager.createBottomPanel("output-panel", $panel);
+            
+            $document = $($iframe.contents()[0]);
+            $document.find("head").append(cssLink);
+            $content = $document.find("body");
+            
             $panel.on("panelResizeUpdate", function (e, newSize) {
                 $iframe.attr("height", newSize - tlBarHeight);
             });
